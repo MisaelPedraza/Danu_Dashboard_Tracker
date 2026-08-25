@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CRISP-Agile Project Tracker</title>
+<style>
+:root{
+  --blue-950:#062844;
+  --blue-900:#0A335A;
+  --blue-800:#0B3F70;
+  --blue-700:#0D4D8C;
+  --blue-600:#1468B3;
+  --blue-500:#2F80D1;
+  --blue-100:#EAF3FC;
+  --blue-050:#F4F8FC;
+  --ink:#172231;
+  --muted:#66758A;
+  --line:#D9E2EC;
+  --bg:#F4F7FA;
+  --white:#FFFFFF;
+  --green:#21875A;
+  --amber:#B97810;
+  --red:#B43C3C;
+  --shadow:0 10px 25px rgba(9,47,83,.08);
+  --radius:14px;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.app{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+.sidebar{
+  background:linear-gradient(180deg,var(--blue-950),var(--blue-900));
+  color:white;padding:22px 18px;position:sticky;top:0;height:100vh;overflow:auto
+}
+.brand{display:flex;gap:12px;align-items:center;margin-bottom:20px}
+.logo{
+  width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#2F80D1,#7CB7F2);
+  display:grid;place-items:center;font-weight:800;font-size:18px;box-shadow:0 6px 16px rgba(0,0,0,.18)
+}
+.brand h1{font-size:16px;margin:0;line-height:1.15}
+.brand small{opacity:.7}
+.project-select{
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);
+  border-radius:12px;padding:12px;margin-bottom:16px
+}
+.project-select label{display:block;font-size:11px;opacity:.7;margin-bottom:6px;text-transform:uppercase;letter-spacing:.08em}
+.project-select select{
+  width:100%;background:#fff;color:var(--ink);border:0;border-radius:8px;padding:9px
+}
+.nav{display:grid;gap:6px}
+.nav button{
+  width:100%;text-align:left;border:0;background:transparent;color:#EAF2FA;padding:11px 12px;border-radius:9px;
+  display:flex;align-items:center;gap:10px
+}
+.nav button:hover,.nav button.active{background:rgba(255,255,255,.12);color:#fff}
+.nav .ico{width:22px;text-align:center}
+.sidebar-footer{margin-top:18px;border-top:1px solid rgba(255,255,255,.15);padding-top:14px;display:grid;gap:8px}
+.sidebar-footer button{
+  border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.07);color:#fff;padding:9px;border-radius:9px
+}
+.main{min-width:0}
+.topbar{
+  height:72px;background:#fff;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;
+  padding:0 26px;position:sticky;top:0;z-index:10
+}
+.topbar .title h2{margin:0;font-size:20px}
+.topbar .title p{margin:3px 0 0;color:var(--muted);font-size:12px}
+.actions{display:flex;gap:8px;align-items:center}
+.btn{
+  border:0;border-radius:9px;padding:10px 14px;font-weight:650
+}
+.btn-primary{background:var(--blue-700);color:white}
+.btn-primary:hover{background:var(--blue-800)}
+.btn-light{background:var(--blue-100);color:var(--blue-800)}
+.btn-ghost{background:#fff;border:1px solid var(--line);color:var(--ink)}
+.btn-danger{background:#FDECEC;color:var(--red)}
+.content{padding:24px}
+.view{display:none}
+.view.active{display:block}
+.grid{display:grid;gap:16px}
+.grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.card{
+  background:#fff;border:1px solid #E2E9F0;border-radius:var(--radius);box-shadow:var(--shadow)
+}
+.card-pad{padding:18px}
+.metric{padding:18px;position:relative;overflow:hidden}
+.metric:after{
+  content:"";position:absolute;right:-20px;bottom:-35px;width:100px;height:100px;border-radius:50%;background:var(--blue-100)
+}
+.metric .label{font-size:12px;color:var(--muted);margin-bottom:8px}
+.metric .value{font-size:28px;font-weight:800;position:relative;z-index:1}
+.metric .sub{font-size:12px;color:var(--muted);margin-top:5px;position:relative;z-index:1}
+.section-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px}
+.section-head h3{margin:0;font-size:17px}
+.section-head p{margin:4px 0 0;color:var(--muted);font-size:12px}
+.progress{height:9px;background:#E9EFF5;border-radius:999px;overflow:hidden}
+.progress > span{display:block;height:100%;background:linear-gradient(90deg,var(--blue-600),var(--blue-500));border-radius:999px}
+.phase-card{padding:18px}
+.phase-top{display:flex;gap:12px;align-items:flex-start}
+.phase-num{width:34px;height:34px;border-radius:10px;background:var(--blue-100);color:var(--blue-800);display:grid;place-items:center;font-weight:800}
+.phase-card h4{margin:0 0 3px;font-size:15px}
+.phase-card p{margin:0;color:var(--muted);font-size:12px;line-height:1.45}
+.phase-status{margin-left:auto}
+.badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:750}
+.badge.todo{background:#EEF2F6;color:#58677B}
+.badge.progressing{background:#EAF3FC;color:#145B96}
+.badge.review{background:#FFF2D9;color:#8A5A00}
+.badge.done{background:#E7F5EE;color:#18754C}
+.badge.high{background:#FDECEC;color:#9D3030}
+.badge.medium{background:#FFF2D9;color:#8A5A00}
+.badge.low{background:#E7F5EE;color:#18754C}
+.phase-progress{display:flex;align-items:center;gap:10px;margin-top:14px}
+.phase-progress .progress{flex:1}
+.phase-progress b{font-size:12px}
+.phase-actions{display:flex;gap:8px;margin-top:14px}
+.phase-actions button{padding:7px 9px;font-size:12px}
+.table-wrap{overflow:auto}
+table{width:100%;border-collapse:collapse}
+th,td{padding:11px 12px;border-bottom:1px solid #E8EDF2;text-align:left;font-size:12px;vertical-align:top}
+th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;background:#FAFCFD;position:sticky;top:0}
+tbody tr:hover{background:#FAFCFF}
+.small{font-size:12px;color:var(--muted)}
+.kicker{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--blue-700);font-weight:800}
+.board{display:grid;grid-template-columns:repeat(4,minmax(220px,1fr));gap:12px;overflow:auto}
+.column{background:#EDF2F6;border-radius:12px;padding:12px;min-height:260px}
+.column h4{margin:0 0 10px;font-size:13px;display:flex;justify-content:space-between}
+.task-card{background:#fff;border:1px solid #DDE5EC;border-radius:10px;padding:11px;margin-bottom:9px;box-shadow:0 3px 8px rgba(0,0,0,.03)}
+.task-card h5{margin:0 0 8px;font-size:12px}
+.task-meta{display:flex;flex-wrap:wrap;gap:5px}
+.tag{font-size:10px;border-radius:999px;padding:4px 7px;background:#EDF3F8;color:#4D6075}
+.task-actions{display:flex;gap:6px;margin-top:9px}
+.task-actions button{border:0;background:#F0F4F8;border-radius:7px;padding:5px 7px;font-size:10px}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.toolbar input,.toolbar select{
+  border:1px solid var(--line);border-radius:9px;background:#fff;padding:9px 10px
+}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.field label{display:block;font-size:11px;font-weight:750;color:#536273;margin-bottom:6px}
+.field input,.field select,.field textarea{
+  width:100%;border:1px solid var(--line);border-radius:9px;padding:10px;background:#fff;color:var(--ink)
+}
+.field textarea{min-height:95px;resize:vertical}
+.full{grid-column:1/-1}
+.modal{
+  position:fixed;inset:0;background:rgba(4,28,50,.55);display:none;align-items:center;justify-content:center;padding:18px;z-index:100
+}
+.modal.open{display:flex}
+.modal-box{background:white;border-radius:16px;box-shadow:0 30px 80px rgba(0,0,0,.28);width:min(760px,96vw);max-height:88vh;overflow:auto}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--line)}
+.modal-body{padding:18px 20px}
+.modal-foot{display:flex;justify-content:flex-end;gap:8px;padding:14px 20px;border-top:1px solid var(--line)}
+.close{border:0;background:#F1F4F7;border-radius:8px;width:32px;height:32px}
+.timeline{display:grid;gap:10px}
+.timeline-item{display:grid;grid-template-columns:110px 1fr;gap:14px;align-items:start}
+.timeline-date{font-size:11px;color:var(--muted);padding-top:8px}
+.timeline-body{border-left:3px solid var(--blue-500);padding:9px 12px;background:#F8FBFE;border-radius:0 10px 10px 0}
+.timeline-body b{font-size:12px}
+.timeline-body p{font-size:12px;color:var(--muted);margin:4px 0 0}
+.empty{padding:24px;text-align:center;color:var(--muted);font-size:12px}
+.callout{
+  padding:14px;border:1px solid #CFE1F3;background:#F4F9FE;border-radius:12px;color:#35536F;font-size:12px;line-height:1.5
+}
+.crisp-loop{
+  display:grid;grid-template-columns:repeat(6,1fr);gap:8px;align-items:stretch
+}
+.loop-node{padding:12px;border-radius:11px;background:var(--blue-100);border:1px solid #CFE1F3;text-align:center;font-size:11px;font-weight:750;color:var(--blue-800)}
+.loop-arrow{display:none}
+.summary-list{display:grid;gap:8px}
+.summary-item{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px dashed #E2E7ED;font-size:12px}
+.summary-item:last-child{border-bottom:0}
+.note-card{padding:14px;border-left:4px solid var(--blue-600);background:#fff;border-radius:10px;border-top:1px solid #E4EAF0;border-right:1px solid #E4EAF0;border-bottom:1px solid #E4EAF0}
+.note-card h5{margin:0 0 5px}
+.note-card p{margin:0;color:var(--muted);font-size:12px;white-space:pre-wrap}
+.tabs{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.tabs button{border:1px solid var(--line);background:white;padding:8px 11px;border-radius:9px;font-size:12px}
+.tabs button.active{background:var(--blue-700);color:white;border-color:var(--blue-700)}
+.mini-chart{height:120px;display:flex;align-items:flex-end;gap:10px;padding-top:18px}
+.bar{flex:1;background:linear-gradient(180deg,var(--blue-500),var(--blue-700));border-radius:6px 6px 0 0;min-height:5px;position:relative}
+.bar span{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);font-size:10px;color:var(--muted);margin-bottom:4px}
+.bar label{position:absolute;top:100%;left:50%;transform:translateX(-50%);font-size:9px;color:var(--muted);margin-top:5px;white-space:nowrap}
+hr{border:0;border-top:1px solid var(--line);margin:16px 0}
+.mobile-nav{display:none}
+@media(max-width:1080px){
+  .grid-4{grid-template-columns:repeat(2,1fr)}
+  .grid-3{grid-template-columns:repeat(2,1fr)}
+  .crisp-loop{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:780px){
+  .app{grid-template-columns:1fr}
+  .sidebar{position:static;height:auto}
+  .nav{grid-template-columns:repeat(2,1fr)}
+  .topbar{position:static;height:auto;padding:16px;gap:10px;align-items:flex-start;flex-direction:column}
+  .content{padding:14px}
+  .grid-4,.grid-3,.grid-2,.form-grid{grid-template-columns:1fr}
+  .board{grid-template-columns:repeat(4,260px)}
+  .crisp-loop{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">CA</div>
+      <div><h1>CRISP-Agile Tracker</h1><small>Data Project OS</small></div>
+    </div>
+
+    <div class="project-select">
+      <label>Proyecto activo</label>
+      <select id="projectSelector"></select>
+    </div>
+
+    <nav class="nav">
+      <button class="active" data-view="dashboard"><span class="ico">◫</span>Dashboard</button>
+      <button data-view="crisp"><span class="ico">◎</span>CRISP-DM</button>
+      <button data-view="agile"><span class="ico">▦</span>Agile / Sprints</button>
+      <button data-view="backlog"><span class="ico">☷</span>Backlog</button>
+      <button data-view="kpis"><span class="ico">◒</span>KPIs</button>
+      <button data-view="risks"><span class="ico">⚠</span>Riesgos</button>
+      <button data-view="deliverables"><span class="ico">✓</span>Entregables</button>
+      <button data-view="notes"><span class="ico">✎</span>Notas & Evidencia</button>
+      <button data-view="team"><span class="ico">♙</span>Equipo</button>
+      <button data-view="settings"><span class="ico">⚙</span>Proyecto</button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button id="newProjectBtn">＋ Nuevo proyecto</button>
+      <button id="exportBtn">⇩ Exportar respaldo</button>
+      <button id="importBtn">⇧ Importar respaldo</button>
+      <input id="importFile" type="file" accept=".json" hidden />
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="title">
+        <h2 id="pageTitle">Dashboard</h2>
+        <p id="projectSubtitle">Seguimiento CRISP-DM + Agile</p>
+      </div>
+      <div class="actions">
+        <button class="btn btn-light" id="quickTaskBtn">＋ Tarea</button>
+        <button class="btn btn-primary" id="quickSprintBtn">＋ Sprint</button>
+      </div>
+    </header>
+
+    <section class="content">
+      <div id="dashboard" class="view active"></div>
+      <div id="crisp" class="view"></div>
+      <div id="agile" class="view"></div>
+      <div id="backlog" class="view"></div>
+      <div id="kpis" class="view"></div>
+      <div id="risks" class="view"></div>
+      <div id="deliverables" class="view"></div>
+      <div id="notes" class="view"></div>
+      <div id="team" class="view"></div>
+      <div id="settings" class="view"></div>
+    </section>
+  </main>
+</div>
+
+<div id="modal" class="modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <strong id="modalTitle">Nuevo elemento</strong>
+      <button class="close" id="modalClose">×</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" id="modalCancel">Cancelar</button>
+      <button class="btn btn-primary" id="modalSave">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PHASES = [
+  {id:"business", n:1, name:"Business Understanding", es:"Comprensión del negocio", desc:"Problema, objetivos, stakeholders, alcance, restricciones y criterios de éxito."},
+  {id:"data", n:2, name:"Data Understanding", es:"Comprensión de los datos", desc:"Fuentes, acceso, exploración, diccionario, calidad, patrones y hallazgos iniciales."},
+  {id:"prep", n:3, name:"Data Preparation", es:"Preparación de datos", desc:"Limpieza, integración, transformaciones, selección y feature engineering."},
+  {id:"model", n:4, name:"Modeling", es:"Modelado", desc:"Baseline, modelos candidatos, experimentos, tuning y comparación."},
+  {id:"eval", n:5, name:"Evaluation", es:"Evaluación", desc:"Métricas técnicas, impacto de negocio, validación y decisión de continuar o iterar."},
+  {id:"deploy", n:6, name:"Deployment", es:"Despliegue", desc:"Dashboard, API, automatización, reporte, documentación y plan de mantenimiento."}
+];
+const STATUS = {
+  todo:"Por hacer",
+  progressing:"En progreso",
+  review:"En revisión",
+  done:"Terminado"
+};
+const KPI_CATEGORIES = [
+  "Negocio",
+  "Proyecto",
+  "Agile",
+  "Datos",
+  "Calidad de datos",
+  "Modelado",
+  "Evaluación",
+  "Despliegue / Operación",
+  "Adopción / Usuario"
+];
+const KPI_FREQUENCIES = [
+  "Diaria",
+  "Semanal",
+  "Por sprint",
+  "Quincenal",
+  "Mensual",
+  "Por revisión",
+  "Al cierre de fase",
+  "Única"
+];
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const uid = () => Math.random().toString(36).slice(2,10);
+const today = () => new Date().toISOString().slice(0,10);
+const esc = s => String(s ?? "").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]));
+const fmt = d => d ? new Date(d+"T12:00:00").toLocaleDateString("es-MX",{day:"2-digit",month:"short",year:"numeric"}) : "—";
+
+const defaultProject = () => ({
+  id:uid(),
+  name:"Danu Analítica – Proyecto de Ciencia de Datos",
+  client:"Danu Analítica",
+  owner:"Atlantic Data Consulting",
+  objective:"Convertir una necesidad de negocio en una solución de datos medible, validada y desplegable mediante CRISP-DM ejecutado de forma iterativa con Agile.",
+  start:today(),
+  end:"",
+  currentPhase:"business",
+  methodology:"Sprints de 1–2 semanas con revisiones frecuentes y ciclos iterativos entre fases CRISP-DM.",
+  team:[],
+  phases:Object.fromEntries(PHASES.map(p=>[p.id,{
+    status:p.id==="business"?"progressing":"todo",
+    notes:"",
+    dod:""
+  }])),
+  sprints:[
+    {id:uid(),name:"Sprint 0 – Alineación",goal:"Alinear problema, alcance, stakeholders, recursos y criterios de éxito.",start:today(),end:"",status:"active",retro:""}
+  ],
+  tasks:[
+    {id:uid(),title:"Definir problema de negocio",phase:"business",sprint:"",status:"progressing",priority:"high",owner:"Equipo",due:"",estimate:2,acceptance:"Problema redactado y validado por el socio formador.",notes:""},
+    {id:uid(),title:"Identificar stakeholders y roles",phase:"business",sprint:"",status:"todo",priority:"medium",owner:"Equipo",due:"",estimate:1,acceptance:"Lista de involucrados, necesidades y responsabilidades.",notes:""},
+    {id:uid(),title:"Definir objetivos y criterios de éxito",phase:"business",sprint:"",status:"todo",priority:"high",owner:"Equipo",due:"",estimate:2,acceptance:"Objetivo general, objetivos específicos y KPIs preliminares.",notes:""},
+    {id:uid(),title:"Inventario inicial de fuentes de datos",phase:"data",sprint:"",status:"todo",priority:"medium",owner:"Equipo",due:"",estimate:2,acceptance:"Fuentes, propietarios, formato, acceso y frecuencia documentados.",notes:""}
+  ],
+  kpis:[
+    {id:uid(),name:"Avance global",category:"Proyecto",target:"100%",current:"",unit:"%",frequency:"Semanal",owner:"Equipo",notes:"Calculado con tareas completadas."},
+    {id:uid(),name:"Tareas completadas por sprint",category:"Agile",target:"≥ 80%",current:"",unit:"%",frequency:"Por sprint",owner:"Equipo",notes:""},
+    {id:uid(),name:"Criterios de éxito validados",category:"Negocio",target:"100%",current:"",unit:"%",frequency:"Por revisión",owner:"Equipo",notes:""}
+  ],
+  risks:[
+    {id:uid(),title:"Acceso insuficiente o tardío a datos",probability:3,impact:5,owner:"Equipo / Socio",mitigation:"Identificar fuentes y permisos desde Business Understanding.",status:"open"},
+    {id:uid(),title:"Cambios de alcance durante modelado",probability:3,impact:4,owner:"Equipo",mitigation:"Reviews frecuentes y criterios de aceptación claros.",status:"open"}
+  ],
+  deliverables:[
+    {id:uid(),name:"Documento de comprensión del negocio",phase:"business",due:"",status:"progressing",link:"",notes:""},
+    {id:uid(),name:"Reporte de comprensión y calidad de datos",phase:"data",due:"",status:"todo",link:"",notes:""},
+    {id:uid(),name:"Dataset preparado v1",phase:"prep",due:"",status:"todo",link:"",notes:""},
+    {id:uid(),name:"Modelo baseline",phase:"model",due:"",status:"todo",link:"",notes:""},
+    {id:uid(),name:"Evaluación técnica y de negocio",phase:"eval",due:"",status:"todo",link:"",notes:""},
+    {id:uid(),name:"Entrega / despliegue final",phase:"deploy",due:"",status:"todo",link:"",notes:""}
+  ],
+  notes:[
+    {id:uid(),title:"Cómo usar este tracker",type:"Decisión",date:today(),content:"CRISP-DM organiza el tipo de trabajo. Agile organiza cómo se ejecuta: backlog, sprints, reviews y retrospectivas. Si un hallazgo cambia el problema, regresa a la fase necesaria y documenta la decisión."}
+  ]
+});
+
+let store = JSON.parse(localStorage.getItem("crispAgileTracker") || "null") || {projects:[defaultProject()],active:null};
+if(!store.active) store.active = store.projects[0].id;
+store.projects.forEach(p=>{
+  if(!Array.isArray(p.team)) p.team=[];
+});
+let currentView = "dashboard";
+let modalState = null;
+
+function save(){
+  localStorage.setItem("crispAgileTracker",JSON.stringify(store));
+}
+function project(){
+  return store.projects.find(p=>p.id===store.active) || store.projects[0];
+}
+function phaseName(id){
+  const p=PHASES.find(x=>x.id===id); return p ? p.es : "—";
+}
+function selectOptions(options,current="",placeholder="Seleccionar..."){
+  const vals=[...options];
+  if(current && !vals.includes(current)) vals.unshift(current);
+  return `<option value="" ${!current?"selected":""}>${esc(placeholder)}</option>` + vals.map(v=>`<option value="${esc(v)}" ${current===v?"selected":""}>${esc(v)}</option>`).join("");
+}
+function ownerOptions(current=""){
+  const names=["Equipo", ...project().team.map(m=>m.name).filter(Boolean)];
+  return selectOptions([...new Set(names)],current,"Sin asignar");
+}
+function calc(){
+  const p=project();
+  const total=p.tasks.length, done=p.tasks.filter(t=>t.status==="done").length;
+  const overall= total ? Math.round(done/total*100) : 0;
+  const activeSprint=p.sprints.find(s=>s.status==="active");
+  const openRisks=p.risks.filter(r=>r.status!=="closed").length;
+  const phaseStats=Object.fromEntries(PHASES.map(ph=>{
+    const tasks=p.tasks.filter(t=>t.phase===ph.id);
+    const d=tasks.filter(t=>t.status==="done").length;
+    return [ph.id,{total:tasks.length,done:d,pct:tasks.length?Math.round(d/tasks.length*100):0}];
+  }));
+  return {total,done,overall,activeSprint,openRisks,phaseStats};
+}
+function renderProjectSelector(){
+  $("#projectSelector").innerHTML=store.projects.map(p=>`<option value="${p.id}" ${p.id===store.active?"selected":""}>${esc(p.name)}</option>`).join("");
+}
+function setView(view){
+  currentView=view;
+  $$(".view").forEach(v=>v.classList.toggle("active",v.id===view));
+  $$(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===view));
+  const titles={dashboard:"Dashboard",crisp:"CRISP-DM",agile:"Agile / Sprints",backlog:"Backlog",kpis:"KPIs",risks:"Riesgos",deliverables:"Entregables",notes:"Notas & Evidencia",team:"Equipo",settings:"Configuración del proyecto"};
+  $("#pageTitle").textContent=titles[view]||view;
+  render();
+}
+function render(){
+  const p=project();
+  $("#projectSubtitle").textContent=p.name;
+  renderProjectSelector();
+  renderDashboard();
+  renderCrisp();
+  renderAgile();
+  renderBacklog();
+  renderKpis();
+  renderRisks();
+  renderDeliverables();
+  renderNotes();
+  renderTeam();
+  renderSettings();
+}
+function statusBadge(s){
+  return `<span class="badge ${s}">${STATUS[s]||s}</span>`;
+}
+function priorityBadge(p){
+  return `<span class="badge ${p}">${p==="high"?"Alta":p==="medium"?"Media":"Baja"}</span>`;
+}
+function renderDashboard(){
+  const p=project(), c=calc();
+  const recent=[...p.notes].sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,4);
+  const upcoming=[...p.tasks].filter(t=>t.due && t.status!=="done").sort((a,b)=>a.due.localeCompare(b.due)).slice(0,5);
+  $("#dashboard").innerHTML=`
+    <div class="grid grid-4">
+      <div class="card metric"><div class="label">Avance global</div><div class="value">${c.overall}%</div><div class="sub">${c.done} de ${c.total} tareas completadas</div></div>
+      <div class="card metric"><div class="label">Fase actual</div><div class="value" style="font-size:20px">${esc(phaseName(p.currentPhase))}</div><div class="sub">CRISP-DM</div></div>
+      <div class="card metric"><div class="label">Sprint activo</div><div class="value" style="font-size:18px">${esc(c.activeSprint?.name||"Sin sprint")}</div><div class="sub">${c.activeSprint?.goal?esc(c.activeSprint.goal):"Crea o activa un sprint"}</div></div>
+      <div class="card metric"><div class="label">Riesgos abiertos</div><div class="value">${c.openRisks}</div><div class="sub">Revisar en cada sprint review</div></div>
+    </div>
+
+    <div class="grid grid-2" style="margin-top:16px">
+      <div class="card card-pad">
+        <div class="section-head"><div><div class="kicker">CRISP-DM</div><h3>Progreso por fase</h3><p>El avance se calcula con las tareas asociadas a cada fase.</p></div></div>
+        <div class="summary-list">
+          ${PHASES.map(ph=>`<div class="summary-item"><span>${ph.n}. ${esc(ph.es)}</span><span style="min-width:150px;display:flex;align-items:center;gap:8px"><span class="progress" style="flex:1"><span style="width:${c.phaseStats[ph.id].pct}%"></span></span><b>${c.phaseStats[ph.id].pct}%</b></span></div>`).join("")}
+        </div>
+      </div>
+      <div class="card card-pad">
+        <div class="section-head"><div><div class="kicker">Agile</div><h3>Flujo de trabajo</h3><p>Distribución actual del backlog por estado.</p></div></div>
+        <div class="mini-chart">
+          ${["todo","progressing","review","done"].map(s=>{
+            const n=p.tasks.filter(t=>t.status===s).length, max=Math.max(1,...["todo","progressing","review","done"].map(x=>p.tasks.filter(t=>t.status===x).length));
+            return `<div class="bar" style="height:${Math.max(8,n/max*90)}px"><span>${n}</span><label>${STATUS[s]}</label></div>`;
+          }).join("")}
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-2" style="margin-top:16px">
+      <div class="card card-pad">
+        <div class="section-head"><div><h3>Próximas tareas</h3><p>Elementos abiertos con fecha límite.</p></div><button class="btn btn-light" onclick="openTask()">＋</button></div>
+        ${upcoming.length?`<div class="timeline">${upcoming.map(t=>`<div class="timeline-item"><div class="timeline-date">${fmt(t.due)}</div><div class="timeline-body"><b>${esc(t.title)}</b><p>${phaseName(t.phase)} · ${STATUS[t.status]}</p></div></div>`).join("")}</div>`:`<div class="empty">Agrega fechas límite para ver próximos compromisos.</div>`}
+      </div>
+      <div class="card card-pad">
+        <div class="section-head"><div><h3>Decisiones y evidencia recientes</h3><p>Registro del aprendizaje del proyecto.</p></div><button class="btn btn-light" onclick="openNote()">＋</button></div>
+        ${recent.length?recent.map(n=>`<div class="note-card" style="margin-bottom:8px"><h5>${esc(n.title)}</h5><p>${esc(n.content).slice(0,180)}${n.content.length>180?"…":""}</p></div>`).join(""):`<div class="empty">Aún no hay notas.</div>`}
+      </div>
+    </div>
+
+    <div class="card card-pad" style="margin-top:16px">
+      <div class="section-head"><div><div class="kicker">Principio operativo</div><h3>CRISP-DM no es una cascada</h3><p>Usa los sprints para validar avances y regresar a fases anteriores cuando aparezca nueva información.</p></div></div>
+      <div class="crisp-loop">${PHASES.map(ph=>`<div class="loop-node">${ph.n}. ${esc(ph.es)}</div>`).join("")}</div>
+    </div>`;
+}
+function renderCrisp(){
+  const p=project(), c=calc();
+  $("#crisp").innerHTML=`
+    <div class="callout" style="margin-bottom:16px"><b>Cómo leer esta vista:</b> las fases indican el tipo de trabajo. El progreso proviene de las tareas. Cambia el estado de una fase cuando haya suficiente evidencia, pero no temas regresar a una fase anterior si un sprint descubre algo importante.</div>
+    <div class="grid grid-3">
+      ${PHASES.map(ph=>{
+        const ps=p.phases[ph.id]||{status:"todo",notes:"",dod:""};
+        const st=c.phaseStats[ph.id];
+        return `<div class="card phase-card">
+          <div class="phase-top">
+            <div class="phase-num">${ph.n}</div>
+            <div><h4>${esc(ph.es)}</h4><p>${esc(ph.name)}</p></div>
+            <div class="phase-status">${statusBadge(ps.status)}</div>
+          </div>
+          <p style="margin-top:12px">${esc(ph.desc)}</p>
+          <div class="phase-progress"><div class="progress"><span style="width:${st.pct}%"></span></div><b>${st.pct}%</b></div>
+          <div class="small" style="margin-top:8px">${st.done}/${st.total} tareas completadas</div>
+          ${ps.dod?`<div class="callout" style="margin-top:10px"><b>Definition of Done:</b><br>${esc(ps.dod)}</div>`:""}
+          <div class="phase-actions">
+            <button class="btn btn-light" onclick="openTask(null,'${ph.id}')">＋ Tarea</button>
+            <button class="btn btn-ghost" onclick="openPhase('${ph.id}')">Editar fase</button>
+          </div>
+        </div>`;
+      }).join("")}
+    </div>`;
+}
+function sprintTasks(sid){ return project().tasks.filter(t=>t.sprint===sid); }
+function renderAgile(){
+  const p=project();
+  const active=p.sprints.find(s=>s.status==="active") || p.sprints[0];
+  $("#agile").innerHTML=`
+    <div class="grid grid-3">
+      ${p.sprints.map(s=>{
+        const ts=sprintTasks(s.id), done=ts.filter(t=>t.status==="done").length, pct=ts.length?Math.round(done/ts.length*100):0;
+        return `<div class="card card-pad">
+          <div class="section-head"><div><h3>${esc(s.name)}</h3><p>${fmt(s.start)} → ${fmt(s.end)}</p></div><span class="badge ${s.status==="active"?"progressing":s.status==="done"?"done":"todo"}">${s.status==="active"?"Activo":s.status==="done"?"Cerrado":"Planeado"}</span></div>
+          <p class="small">${esc(s.goal||"Sin objetivo")}</p>
+          <div class="phase-progress"><div class="progress"><span style="width:${pct}%"></span></div><b>${pct}%</b></div>
+          <div class="phase-actions"><button class="btn btn-light" onclick="openTask(null,null,'${s.id}')">＋ Tarea</button><button class="btn btn-ghost" onclick="openSprint('${s.id}')">Editar</button><button class="btn btn-danger" onclick="deleteSprint('${s.id}')">Eliminar</button></div>
+        </div>`;
+      }).join("")}
+      <button class="card card-pad" style="border:2px dashed #BDD1E3;background:#F9FCFF;color:var(--blue-800);font-weight:800" onclick="openSprint()">＋ Crear sprint</button>
+    </div>
+
+    <div class="card card-pad" style="margin-top:16px">
+      <div class="section-head"><div><div class="kicker">Kanban del sprint</div><h3>${esc(active?.name||"Sin sprint activo")}</h3><p>${esc(active?.goal||"Activa un sprint para trabajar con su tablero.")}</p></div>${active?`<button class="btn btn-primary" onclick="openTask(null,null,'${active.id}')">＋ Tarea</button>`:""}</div>
+      ${active?renderBoard(active.id):`<div class="empty">No hay sprint activo.</div>`}
+    </div>
+
+    <div class="card card-pad" style="margin-top:16px">
+      <div class="section-head"><div><h3>Cadencia recomendada</h3><p>Usa este ritual para mantener el proyecto realmente iterativo.</p></div></div>
+      <div class="grid grid-4">
+        <div class="callout"><b>1. Sprint Planning</b><br>Selecciona backlog, objetivo del sprint y criterios de aceptación.</div>
+        <div class="callout"><b>2. Ejecución</b><br>Mueve tareas: Por hacer → En progreso → Revisión → Terminado.</div>
+        <div class="callout"><b>3. Sprint Review</b><br>Valida entregables con el socio y registra decisiones.</div>
+        <div class="callout"><b>4. Retrospectiva</b><br>Documenta qué funcionó, qué cambiar y cómo afectó CRISP-DM.</div>
+      </div>
+    </div>`;
+}
+function renderBoard(sid){
+  const p=project();
+  return `<div class="board">${["todo","progressing","review","done"].map(s=>{
+    const tasks=p.tasks.filter(t=>t.sprint===sid && t.status===s);
+    return `<div class="column"><h4>${STATUS[s]} <span>${tasks.length}</span></h4>${tasks.map(taskCard).join("")||`<div class="empty">Sin tareas</div>`}</div>`;
+  }).join("")}</div>`;
+}
+function taskCard(t){
+  return `<div class="task-card"><h5>${esc(t.title)}</h5><div class="task-meta"><span class="tag">${esc(phaseName(t.phase))}</span>${priorityBadge(t.priority)}${t.due?`<span class="tag">${fmt(t.due)}</span>`:""}</div><div class="task-actions"><button onclick="advanceTask('${t.id}')">Avanzar →</button><button onclick="openTask('${t.id}')">Editar</button><button class="btn-danger" onclick="deleteTask('${t.id}')">Eliminar</button></div></div>`;
+}
+function renderBacklog(){
+  const p=project();
+  const phaseFilter=$("#backlog")?.dataset.phase||"";
+  const statusFilter=$("#backlog")?.dataset.status||"";
+  const tasks=p.tasks.filter(t=>(!phaseFilter||t.phase===phaseFilter)&&(!statusFilter||t.status===statusFilter));
+  $("#backlog").innerHTML=`
+    <div class="card card-pad">
+      <div class="section-head"><div><h3>Product / Data Backlog</h3><p>Cada tarea debe tener fase CRISP-DM, prioridad y criterio de aceptación.</p></div><button class="btn btn-primary" onclick="openTask()">＋ Nueva tarea</button></div>
+      <div class="toolbar">
+        <select onchange="setBacklogFilter('phase',this.value)"><option value="">Todas las fases</option>${PHASES.map(ph=>`<option value="${ph.id}" ${phaseFilter===ph.id?"selected":""}>${ph.es}</option>`).join("")}</select>
+        <select onchange="setBacklogFilter('status',this.value)"><option value="">Todos los estados</option>${Object.entries(STATUS).map(([k,v])=>`<option value="${k}" ${statusFilter===k?"selected":""}>${v}</option>`).join("")}</select>
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>Tarea</th><th>Fase</th><th>Sprint</th><th>Estado</th><th>Prioridad</th><th>Due</th><th>Owner</th><th></th></tr></thead><tbody>
+        ${tasks.map(t=>`<tr><td><b>${esc(t.title)}</b>${t.acceptance?`<div class="small">${esc(t.acceptance)}</div>`:""}</td><td>${esc(phaseName(t.phase))}</td><td>${esc(p.sprints.find(s=>s.id===t.sprint)?.name||"Backlog")}</td><td>${statusBadge(t.status)}</td><td>${priorityBadge(t.priority)}</td><td>${fmt(t.due)}</td><td>${esc(t.owner||"—")}</td><td><div style="display:flex;gap:6px"><button class="btn btn-ghost" onclick="openTask('${t.id}')">Editar</button><button class="btn btn-danger" onclick="deleteTask('${t.id}')">Eliminar</button></div></td></tr>`).join("")||`<tr><td colspan="8" class="empty">Sin tareas con estos filtros.</td></tr>`}
+      </tbody></table></div>
+    </div>`;
+}
+function renderKpis(){
+  const p=project(), c=calc();
+  $("#kpis").innerHTML=`
+    <div class="grid grid-3">
+      <div class="card metric"><div class="label">Avance global real</div><div class="value">${c.overall}%</div><div class="sub">Calculado con tareas terminadas</div></div>
+      <div class="card metric"><div class="label">Backlog completado</div><div class="value">${c.done}/${c.total}</div><div class="sub">Total de tareas</div></div>
+      <div class="card metric"><div class="label">Fases con avance</div><div class="value">${PHASES.filter(ph=>c.phaseStats[ph.id].pct>0).length}/6</div><div class="sub">CRISP-DM</div></div>
+    </div>
+    <div class="card card-pad" style="margin-top:16px">
+      <div class="section-head"><div><h3>KPIs del proyecto</h3><p>Combina métricas de negocio, técnicas y de ejecución.</p></div><button class="btn btn-primary" onclick="openKpi()">＋ KPI</button></div>
+      <div class="table-wrap"><table><thead><tr><th>KPI</th><th>Categoría</th><th>Meta</th><th>Actual</th><th>Frecuencia</th><th>Owner</th><th></th></tr></thead><tbody>
+        ${p.kpis.map(k=>`<tr><td><b>${esc(k.name)}</b><div class="small">${esc(k.notes||"")}</div></td><td>${esc(k.category)}</td><td>${esc(k.target)}</td><td>${esc(k.current||"—")} ${esc(k.unit||"")}</td><td>${esc(k.frequency||"—")}</td><td>${esc(k.owner||"—")}</td><td><div style="display:flex;gap:6px"><button class="btn btn-ghost" onclick="openKpi('${k.id}')">Editar</button><button class="btn btn-danger" onclick="deleteKpi('${k.id}')">Eliminar</button></div></td></tr>`).join("")||`<tr><td colspan="7" class="empty">Sin KPIs.</td></tr>`}
+      </tbody></table></div>
+    </div>`;
+}
+function renderRisks(){
+  const p=project();
+  $("#risks").innerHTML=`
+    <div class="card card-pad">
+      <div class="section-head"><div><h3>Registro de riesgos</h3><p>Score = probabilidad × impacto. Revisa los riesgos en cada sprint review.</p></div><button class="btn btn-primary" onclick="openRisk()">＋ Riesgo</button></div>
+      <div class="table-wrap"><table><thead><tr><th>Riesgo</th><th>Prob.</th><th>Impacto</th><th>Score</th><th>Owner</th><th>Mitigación</th><th>Estado</th><th></th></tr></thead><tbody>
+      ${[...p.risks].sort((a,b)=>(b.probability*b.impact)-(a.probability*a.impact)).map(r=>{
+        const score=r.probability*r.impact, level=score>=15?"high":score>=8?"medium":"low";
+        return `<tr><td><b>${esc(r.title)}</b></td><td>${r.probability}/5</td><td>${r.impact}/5</td><td>${priorityBadge(level)}</td><td>${esc(r.owner||"—")}</td><td>${esc(r.mitigation||"—")}</td><td>${r.status==="closed"?statusBadge("done"):statusBadge("progressing")}</td><td><div style="display:flex;gap:6px"><button class="btn btn-ghost" onclick="openRisk('${r.id}')">Editar</button><button class="btn btn-danger" onclick="deleteRisk('${r.id}')">Eliminar</button></div></td></tr>`;
+      }).join("")||`<tr><td colspan="8" class="empty">Sin riesgos registrados.</td></tr>`}
+      </tbody></table></div>
+    </div>`;
+}
+function renderDeliverables(){
+  const p=project();
+  $("#deliverables").innerHTML=`
+    <div class="card card-pad">
+      <div class="section-head"><div><h3>Entregables y Definition of Done</h3><p>Conecta cada resultado visible con una fase CRISP-DM y una fecha de entrega.</p></div><button class="btn btn-primary" onclick="openDeliverable()">＋ Entregable</button></div>
+      <div class="table-wrap"><table><thead><tr><th>Entregable</th><th>Fase</th><th>Fecha</th><th>Estado</th><th>Referencia</th><th></th></tr></thead><tbody>
+      ${p.deliverables.map(d=>`<tr><td><b>${esc(d.name)}</b><div class="small">${esc(d.notes||"")}</div></td><td>${esc(phaseName(d.phase))}</td><td>${fmt(d.due)}</td><td>${statusBadge(d.status)}</td><td>${d.link?`<a href="${esc(d.link)}" target="_blank">Abrir</a>`:"—"}</td><td><div style="display:flex;gap:6px"><button class="btn btn-ghost" onclick="openDeliverable('${d.id}')">Editar</button><button class="btn btn-danger" onclick="deleteDeliverable('${d.id}')">Eliminar</button></div></td></tr>`).join("")||`<tr><td colspan="6" class="empty">Sin entregables.</td></tr>`}
+      </tbody></table></div>
+    </div>`;
+}
+function renderNotes(){
+  const p=project();
+  const types=["Decisión","Evidencia","Hallazgo","Review","Retrospectiva","Supuesto"];
+  $("#notes").innerHTML=`
+    <div class="card card-pad">
+      <div class="section-head"><div><h3>Bitácora del proyecto</h3><p>Documenta por qué cambió el proyecto, no solo qué cambió.</p></div><button class="btn btn-primary" onclick="openNote()">＋ Nota</button></div>
+      <div class="tabs">${types.map(t=>`<button onclick="filterNotes('${t}',this)">${t}</button>`).join("")}<button class="active" onclick="filterNotes('',this)">Todas</button></div>
+      <div id="notesList">${renderNoteList(p.notes)}</div>
+    </div>`;
+}
+function renderNoteList(notes){
+  return notes.length?`<div class="grid grid-2">${[...notes].sort((a,b)=>String(b.date).localeCompare(String(a.date))).map(n=>`<div class="note-card"><div class="small">${esc(n.type)} · ${fmt(n.date)}</div><h5>${esc(n.title)}</h5><p>${esc(n.content)}</p><div style="margin-top:9px;display:flex;gap:6px"><button class="btn btn-ghost" onclick="openNote('${n.id}')">Editar</button><button class="btn btn-danger" onclick="deleteNote('${n.id}')">Eliminar</button></div></div>`).join("")}</div>`:`<div class="empty">Sin notas.</div>`;
+}
+function filterNotes(type,el){
+  $$("#notes .tabs button").forEach(b=>b.classList.remove("active")); el.classList.add("active");
+  $("#notesList").innerHTML=renderNoteList(type?project().notes.filter(n=>n.type===type):project().notes);
+}
+function renderTeam(){
+  const p=project();
+  const memberNames=new Set(p.team.map(m=>m.name));
+  const assigned=[...p.tasks,...p.kpis,...p.risks].filter(x=>x.owner && memberNames.has(x.owner)).length;
+  $("#team").innerHTML=`
+    <div class="grid grid-3" style="margin-bottom:16px">
+      <div class="card metric"><div class="label">Miembros del equipo</div><div class="value">${p.team.length}</div><div class="sub">Personas registradas en este proyecto</div></div>
+      <div class="card metric"><div class="label">Asignaciones activas</div><div class="value">${assigned}</div><div class="sub">Tareas, KPIs y riesgos con owner del equipo</div></div>
+      <div class="card metric"><div class="label">Owner genérico</div><div class="value" style="font-size:20px">Equipo</div><div class="sub">Disponible aunque no agregues personas</div></div>
+    </div>
+    <div class="card card-pad">
+      <div class="section-head"><div><h3>Personas / Equipo</h3><p>Agrega a las personas del proyecto para poder asignarlas como Owner en KPIs, tareas y riesgos.</p></div><button class="btn btn-primary" onclick="openMember()">＋ Persona</button></div>
+      <div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Rol</th><th>Email</th><th>Asignaciones</th><th></th></tr></thead><tbody>
+        ${p.team.map(m=>{
+          const count=[...p.tasks,...p.kpis,...p.risks].filter(x=>x.owner===m.name).length;
+          return `<tr><td><b>${esc(m.name)}</b></td><td>${esc(m.role||"—")}</td><td>${esc(m.email||"—")}</td><td>${count}</td><td><div style="display:flex;gap:6px"><button class="btn btn-ghost" onclick="openMember('${m.id}')">Editar</button><button class="btn btn-danger" onclick="deleteMember('${m.id}')">Eliminar</button></div></td></tr>`;
+        }).join("")||`<tr><td colspan="5" class="empty">Aún no has agregado personas. Puedes seguir usando “Equipo” como owner genérico.</td></tr>`}
+      </tbody></table></div>
+    </div>`;
+}
+function openMember(id=null){
+  const p=project(), m=p.team.find(x=>x.id===id)||{};
+  openModal(id?"Editar persona":"Nueva persona",`
+    <div class="form-grid">
+      <div class="field full"><label>Nombre</label><input id="mMemberName" value="${esc(m.name||"")}" placeholder="Ej. Ana López"></div>
+      <div class="field"><label>Rol</label><input id="mMemberRole" value="${esc(m.role||"")}" placeholder="Ej. Data Analyst"></div>
+      <div class="field"><label>Email</label><input id="mMemberEmail" type="email" value="${esc(m.email||"")}" placeholder="nombre@correo.com"></div>
+    </div>
+  `,()=>{
+    const name=$("#mMemberName").value.trim(); if(!name){alert("Agrega un nombre.");return;}
+    const duplicate=p.team.some(x=>x.id!==id && x.name.toLowerCase()===name.toLowerCase());
+    if(duplicate){alert("Ya existe una persona con ese nombre.");return;}
+    const obj={id:id||uid(),name,role:$("#mMemberRole").value.trim(),email:$("#mMemberEmail").value.trim()};
+    if(id){
+      const old=p.team.find(x=>x.id===id);
+      const oldName=old.name;
+      Object.assign(old,obj);
+      if(oldName!==name){
+        [...p.tasks,...p.kpis,...p.risks].forEach(x=>{if(x.owner===oldName)x.owner=name;});
+      }
+    } else p.team.push(obj);
+    save();closeModal();render();
+  });
+}
+function deleteMember(id){
+  const p=project(), m=p.team.find(x=>x.id===id); if(!m)return;
+  const refs=[...p.tasks,...p.kpis,...p.risks].filter(x=>x.owner===m.name).length;
+  const extra=refs?`\n\nTiene ${refs} asignación(es). Esos registros pasarán a “Equipo”.`:"";
+  if(!confirmDelete(`¿Eliminar a "${m.name}" del equipo?${extra}`))return;
+  [...p.tasks,...p.kpis,...p.risks].forEach(x=>{if(x.owner===m.name)x.owner="Equipo";});
+  p.team=p.team.filter(x=>x.id!==id);
+  save();render();
+}
+
+function renderSettings(){
+  const p=project();
+  $("#settings").innerHTML=`
+    <div class="grid grid-2">
+      <div class="card card-pad">
+        <div class="section-head"><div><h3>Información del proyecto</h3><p>Editable y reutilizable para cualquier iniciativa de datos.</p></div></div>
+        <div class="form-grid">
+          <div class="field full"><label>Nombre del proyecto</label><input id="setName" value="${esc(p.name)}"></div>
+          <div class="field"><label>Cliente / organización</label><input id="setClient" value="${esc(p.client||"")}"></div>
+          <div class="field"><label>Owner / equipo</label><input id="setOwner" value="${esc(p.owner||"")}"></div>
+          <div class="field"><label>Inicio</label><input id="setStart" type="date" value="${esc(p.start||"")}"></div>
+          <div class="field"><label>Fin objetivo</label><input id="setEnd" type="date" value="${esc(p.end||"")}"></div>
+          <div class="field full"><label>Objetivo</label><textarea id="setObjective">${esc(p.objective||"")}</textarea></div>
+          <div class="field full"><label>Forma de trabajo</label><textarea id="setMethod">${esc(p.methodology||"")}</textarea></div>
+          <div class="field"><label>Fase actual</label><select id="setCurrentPhase">${PHASES.map(ph=>`<option value="${ph.id}" ${p.currentPhase===ph.id?"selected":""}>${ph.es}</option>`).join("")}</select></div>
+          <div class="full"><button class="btn btn-primary" onclick="saveSettings()">Guardar cambios</button></div>
+        </div>
+      </div>
+      <div class="card card-pad">
+        <div class="section-head"><div><h3>Principios de uso</h3><p>Reglas prácticas para combinar CRISP-DM con Agile.</p></div></div>
+        <div class="summary-list">
+          <div class="summary-item"><span>CRISP-DM</span><b>Define el tipo de trabajo</b></div>
+          <div class="summary-item"><span>Backlog</span><b>Define lo pendiente</b></div>
+          <div class="summary-item"><span>Sprint</span><b>Define el foco inmediato</b></div>
+          <div class="summary-item"><span>Review</span><b>Valida con evidencia</b></div>
+          <div class="summary-item"><span>Retrospectiva</span><b>Mejora el proceso</b></div>
+          <div class="summary-item"><span>Bitácora</span><b>Conserva aprendizaje y decisiones</b></div>
+        </div>
+        <hr>
+        <button class="btn btn-danger" onclick="deleteProject()">Eliminar este proyecto</button>
+      </div>
+    </div>`;
+}
+function saveSettings(){
+  const p=project();
+  p.name=$("#setName").value.trim()||p.name;
+  p.client=$("#setClient").value.trim();
+  p.owner=$("#setOwner").value.trim();
+  p.start=$("#setStart").value;
+  p.end=$("#setEnd").value;
+  p.objective=$("#setObjective").value.trim();
+  p.methodology=$("#setMethod").value.trim();
+  p.currentPhase=$("#setCurrentPhase").value;
+  save(); render();
+}
+function setBacklogFilter(k,v){ $("#backlog").dataset[k]=v; renderBacklog(); }
+function advanceTask(id){
+  const t=project().tasks.find(x=>x.id===id); if(!t)return;
+  const flow=["todo","progressing","review","done"]; const i=flow.indexOf(t.status); t.status=flow[Math.min(i+1,flow.length-1)];
+  save(); render();
+}
+
+
+function confirmDelete(message){
+  return confirm(message + "\n\nEsta acción no se puede deshacer, salvo que tengas un respaldo exportado.");
+}
+function deleteTask(id){
+  const p=project();
+  const t=p.tasks.find(x=>x.id===id); if(!t)return;
+  if(!confirmDelete(`¿Eliminar la tarea "${t.title}"?`))return;
+  p.tasks=p.tasks.filter(x=>x.id!==id);
+  save();render();
+}
+function deleteSprint(id){
+  const p=project();
+  const s=p.sprints.find(x=>x.id===id); if(!s)return;
+  if(!confirmDelete(`¿Eliminar el sprint "${s.name}"? Las tareas asignadas volverán al Backlog.`))return;
+  p.tasks.forEach(t=>{ if(t.sprint===id) t.sprint=""; });
+  p.sprints=p.sprints.filter(x=>x.id!==id);
+  save();render();
+}
+function deleteKpi(id){
+  const p=project();
+  const k=p.kpis.find(x=>x.id===id); if(!k)return;
+  if(!confirmDelete(`¿Eliminar el KPI "${k.name}"?`))return;
+  p.kpis=p.kpis.filter(x=>x.id!==id);
+  save();render();
+}
+function deleteRisk(id){
+  const p=project();
+  const r=p.risks.find(x=>x.id===id); if(!r)return;
+  if(!confirmDelete(`¿Eliminar el riesgo "${r.title}"?`))return;
+  p.risks=p.risks.filter(x=>x.id!==id);
+  save();render();
+}
+function deleteDeliverable(id){
+  const p=project();
+  const d=p.deliverables.find(x=>x.id===id); if(!d)return;
+  if(!confirmDelete(`¿Eliminar el entregable "${d.name}"?`))return;
+  p.deliverables=p.deliverables.filter(x=>x.id!==id);
+  save();render();
+}
+function deleteNote(id){
+  const p=project();
+  const n=p.notes.find(x=>x.id===id); if(!n)return;
+  if(!confirmDelete(`¿Eliminar la nota "${n.title}"?`))return;
+  p.notes=p.notes.filter(x=>x.id!==id);
+  save();render();
+}
+
+function openModal(title,body,onSave){
+  $("#modalTitle").textContent=title;
+  $("#modalBody").innerHTML=body;
+  $("#modal").classList.add("open");
+  modalState=onSave;
+}
+function closeModal(){ $("#modal").classList.remove("open"); modalState=null; }
+$("#modalClose").onclick=closeModal;
+$("#modalCancel").onclick=closeModal;
+$("#modalSave").onclick=()=>{ if(modalState) modalState(); };
+
+function openTask(id=null,phase=null,sprint=null){
+  const p=project(), t=p.tasks.find(x=>x.id===id)||{};
+  openModal(id?"Editar tarea":"Nueva tarea",`
+    <div class="form-grid">
+      <div class="field full"><label>Título</label><input id="mTitle" value="${esc(t.title||"")}"></div>
+      <div class="field"><label>Fase CRISP-DM</label><select id="mPhase">${PHASES.map(ph=>`<option value="${ph.id}" ${(t.phase||phase||p.currentPhase)===ph.id?"selected":""}>${ph.es}</option>`).join("")}</select></div>
+      <div class="field"><label>Sprint</label><select id="mSprint"><option value="">Backlog</option>${p.sprints.map(s=>`<option value="${s.id}" ${(t.sprint||sprint||"")===s.id?"selected":""}>${esc(s.name)}</option>`).join("")}</select></div>
+      <div class="field"><label>Estado</label><select id="mStatus">${Object.entries(STATUS).map(([k,v])=>`<option value="${k}" ${(t.status||"todo")===k?"selected":""}>${v}</option>`).join("")}</select></div>
+      <div class="field"><label>Prioridad</label><select id="mPriority"><option value="high" ${(t.priority||"medium")==="high"?"selected":""}>Alta</option><option value="medium" ${(t.priority||"medium")==="medium"?"selected":""}>Media</option><option value="low" ${(t.priority||"medium")==="low"?"selected":""}>Baja</option></select></div>
+      <div class="field"><label>Owner</label><select id="mOwner">${ownerOptions(t.owner||"")}</select></div>
+      <div class="field"><label>Fecha límite</label><input id="mDue" type="date" value="${esc(t.due||"")}"></div>
+      <div class="field"><label>Estimación (puntos/hrs)</label><input id="mEstimate" type="number" min="0" value="${esc(t.estimate||"")}"></div>
+      <div class="field full"><label>Criterio de aceptación</label><textarea id="mAcceptance">${esc(t.acceptance||"")}</textarea></div>
+      <div class="field full"><label>Notas</label><textarea id="mNotes">${esc(t.notes||"")}</textarea></div>
+    </div>
+  `,()=>{
+    const title=$("#mTitle").value.trim(); if(!title){alert("Agrega un título.");return;}
+    const obj={id:id||uid(),title,phase:$("#mPhase").value,sprint:$("#mSprint").value,status:$("#mStatus").value,priority:$("#mPriority").value,owner:$("#mOwner").value.trim(),due:$("#mDue").value,estimate:Number($("#mEstimate").value||0),acceptance:$("#mAcceptance").value.trim(),notes:$("#mNotes").value.trim()};
+    if(id) Object.assign(p.tasks.find(x=>x.id===id),obj); else p.tasks.push(obj);
+    save();closeModal();render();
+  });
+}
+function openSprint(id=null){
+  const p=project(), s=p.sprints.find(x=>x.id===id)||{};
+  openModal(id?"Editar sprint":"Nuevo sprint",`
+    <div class="form-grid">
+      <div class="field full"><label>Nombre</label><input id="mName" value="${esc(s.name||"")}"></div>
+      <div class="field full"><label>Objetivo del sprint</label><textarea id="mGoal">${esc(s.goal||"")}</textarea></div>
+      <div class="field"><label>Inicio</label><input id="mStart" type="date" value="${esc(s.start||today())}"></div>
+      <div class="field"><label>Fin</label><input id="mEnd" type="date" value="${esc(s.end||"")}"></div>
+      <div class="field"><label>Estado</label><select id="mState"><option value="planned" ${(s.status||"planned")==="planned"?"selected":""}>Planeado</option><option value="active" ${(s.status||"planned")==="active"?"selected":""}>Activo</option><option value="done" ${(s.status||"planned")==="done"?"selected":""}>Cerrado</option></select></div>
+      <div class="field full"><label>Retrospectiva</label><textarea id="mRetro">${esc(s.retro||"")}</textarea></div>
+    </div>
+  `,()=>{
+    const name=$("#mName").value.trim(); if(!name){alert("Agrega un nombre.");return;}
+    const state=$("#mState").value;
+    if(state==="active") p.sprints.forEach(x=>{if(x.id!==id)x.status=x.status==="active"?"planned":x.status});
+    const obj={id:id||uid(),name,goal:$("#mGoal").value.trim(),start:$("#mStart").value,end:$("#mEnd").value,status:state,retro:$("#mRetro").value.trim()};
+    if(id) Object.assign(p.sprints.find(x=>x.id===id),obj); else p.sprints.push(obj);
+    if(obj.retro){
+      const existing=p.notes.find(n=>n.title===`Retrospectiva: ${obj.name}`);
+      if(!existing)p.notes.push({id:uid(),title:`Retrospectiva: ${obj.name}`,type:"Retrospectiva",date:obj.end||today(),content:obj.retro});
+    }
+    save();closeModal();render();
+  });
+}
+function openPhase(id){
+  const p=project(), ph=PHASES.find(x=>x.id===id), ps=p.phases[id]||{};
+  openModal(`Editar fase: ${ph.es}`,`
+    <div class="form-grid">
+      <div class="field"><label>Estado</label><select id="mStatus">${Object.entries(STATUS).map(([k,v])=>`<option value="${k}" ${(ps.status||"todo")===k?"selected":""}>${v}</option>`).join("")}</select></div>
+      <div class="field full"><label>Definition of Done</label><textarea id="mDod">${esc(ps.dod||"")}</textarea></div>
+      <div class="field full"><label>Notas de fase</label><textarea id="mNotes">${esc(ps.notes||"")}</textarea></div>
+    </div>
+  `,()=>{
+    p.phases[id]={status:$("#mStatus").value,dod:$("#mDod").value.trim(),notes:$("#mNotes").value.trim()};
+    save();closeModal();render();
+  });
+}
+function openKpi(id=null){
+  const p=project(), k=p.kpis.find(x=>x.id===id)||{};
+  openModal(id?"Editar KPI":"Nuevo KPI",`
+    <div class="form-grid">
+      <div class="field full"><label>Nombre</label><input id="mName" value="${esc(k.name||"")}"></div>
+      <div class="field"><label>Categoría</label><select id="mCategory">${selectOptions(KPI_CATEGORIES,k.category||"","Seleccionar categoría")}</select></div>
+      <div class="field"><label>Meta</label><input id="mTarget" value="${esc(k.target||"")}"></div>
+      <div class="field"><label>Valor actual</label><input id="mCurrent" value="${esc(k.current||"")}"></div>
+      <div class="field"><label>Unidad</label><input id="mUnit" value="${esc(k.unit||"")}"></div>
+      <div class="field"><label>Frecuencia</label><select id="mFrequency">${selectOptions(KPI_FREQUENCIES,k.frequency||"","Seleccionar frecuencia")}</select></div>
+      <div class="field"><label>Owner</label><select id="mOwner">${ownerOptions(k.owner||"")}</select></div>
+      <div class="field full"><label>Notas</label><textarea id="mNotes">${esc(k.notes||"")}</textarea></div>
+    </div>
+  `,()=>{
+    const obj={id:id||uid(),name:$("#mName").value.trim(),category:$("#mCategory").value.trim(),target:$("#mTarget").value.trim(),current:$("#mCurrent").value.trim(),unit:$("#mUnit").value.trim(),frequency:$("#mFrequency").value.trim(),owner:$("#mOwner").value.trim(),notes:$("#mNotes").value.trim()};
+    if(!obj.name){alert("Agrega un nombre.");return}
+    if(id)Object.assign(p.kpis.find(x=>x.id===id),obj);else p.kpis.push(obj);
+    save();closeModal();render();
+  });
+}
+function openRisk(id=null){
+  const p=project(), r=p.risks.find(x=>x.id===id)||{};
+  openModal(id?"Editar riesgo":"Nuevo riesgo",`
+    <div class="form-grid">
+      <div class="field full"><label>Riesgo</label><input id="mTitle" value="${esc(r.title||"")}"></div>
+      <div class="field"><label>Probabilidad (1–5)</label><input id="mProb" type="number" min="1" max="5" value="${esc(r.probability||3)}"></div>
+      <div class="field"><label>Impacto (1–5)</label><input id="mImpact" type="number" min="1" max="5" value="${esc(r.impact||3)}"></div>
+      <div class="field"><label>Owner</label><select id="mOwner">${ownerOptions(r.owner||"")}</select></div>
+      <div class="field"><label>Estado</label><select id="mState"><option value="open" ${(r.status||"open")==="open"?"selected":""}>Abierto</option><option value="closed" ${(r.status||"open")==="closed"?"selected":""}>Cerrado</option></select></div>
+      <div class="field full"><label>Mitigación</label><textarea id="mMitigation">${esc(r.mitigation||"")}</textarea></div>
+    </div>
+  `,()=>{
+    const obj={id:id||uid(),title:$("#mTitle").value.trim(),probability:Number($("#mProb").value),impact:Number($("#mImpact").value),owner:$("#mOwner").value.trim(),mitigation:$("#mMitigation").value.trim(),status:$("#mState").value};
+    if(!obj.title){alert("Agrega un riesgo.");return}
+    if(id)Object.assign(p.risks.find(x=>x.id===id),obj);else p.risks.push(obj);
+    save();closeModal();render();
+  });
+}
+function openDeliverable(id=null){
+  const p=project(), d=p.deliverables.find(x=>x.id===id)||{};
+  openModal(id?"Editar entregable":"Nuevo entregable",`
+    <div class="form-grid">
+      <div class="field full"><label>Entregable</label><input id="mName" value="${esc(d.name||"")}"></div>
+      <div class="field"><label>Fase</label><select id="mPhase">${PHASES.map(ph=>`<option value="${ph.id}" ${(d.phase||p.currentPhase)===ph.id?"selected":""}>${ph.es}</option>`).join("")}</select></div>
+      <div class="field"><label>Fecha</label><input id="mDue" type="date" value="${esc(d.due||"")}"></div>
+      <div class="field"><label>Estado</label><select id="mStatus">${Object.entries(STATUS).map(([k,v])=>`<option value="${k}" ${(d.status||"todo")===k?"selected":""}>${v}</option>`).join("")}</select></div>
+      <div class="field full"><label>Enlace / referencia</label><input id="mLink" value="${esc(d.link||"")}" placeholder="https://..."></div>
+      <div class="field full"><label>Definition of Done / notas</label><textarea id="mNotes">${esc(d.notes||"")}</textarea></div>
+    </div>
+  `,()=>{
+    const obj={id:id||uid(),name:$("#mName").value.trim(),phase:$("#mPhase").value,due:$("#mDue").value,status:$("#mStatus").value,link:$("#mLink").value.trim(),notes:$("#mNotes").value.trim()};
+    if(!obj.name){alert("Agrega un nombre.");return}
+    if(id)Object.assign(p.deliverables.find(x=>x.id===id),obj);else p.deliverables.push(obj);
+    save();closeModal();render();
+  });
+}
+function openNote(id=null){
+  const p=project(), n=p.notes.find(x=>x.id===id)||{};
+  openModal(id?"Editar nota":"Nueva nota",`
+    <div class="form-grid">
+      <div class="field full"><label>Título</label><input id="mTitle" value="${esc(n.title||"")}"></div>
+      <div class="field"><label>Tipo</label><select id="mType">${["Decisión","Evidencia","Hallazgo","Review","Retrospectiva","Supuesto"].map(x=>`<option ${n.type===x?"selected":""}>${x}</option>`).join("")}</select></div>
+      <div class="field"><label>Fecha</label><input id="mDate" type="date" value="${esc(n.date||today())}"></div>
+      <div class="field full"><label>Contenido</label><textarea id="mContent">${esc(n.content||"")}</textarea></div>
+    </div>
+  `,()=>{
+    const obj={id:id||uid(),title:$("#mTitle").value.trim(),type:$("#mType").value,date:$("#mDate").value,content:$("#mContent").value.trim()};
+    if(!obj.title){alert("Agrega un título.");return}
+    if(id)Object.assign(p.notes.find(x=>x.id===id),obj);else p.notes.push(obj);
+    save();closeModal();render();
+  });
+}
+function newProject(){
+  openModal("Nuevo proyecto",`
+    <div class="form-grid">
+      <div class="field full"><label>Nombre</label><input id="mName" placeholder="Ej. Customer Churn Prediction"></div>
+      <div class="field"><label>Cliente / organización</label><input id="mClient"></div>
+      <div class="field"><label>Owner / equipo</label><input id="mOwner"></div>
+      <div class="field full"><label>Objetivo</label><textarea id="mObjective"></textarea></div>
+    </div>
+  `,()=>{
+    const name=$("#mName").value.trim(); if(!name){alert("Agrega un nombre.");return}
+    const np=defaultProject();
+    np.name=name;np.client=$("#mClient").value.trim();np.owner=$("#mOwner").value.trim();np.objective=$("#mObjective").value.trim();
+    np.tasks=[];np.kpis=[];np.risks=[];np.notes=[];np.sprints=[];np.deliverables=PHASES.map(ph=>({id:uid(),name:`Entregable — ${ph.es}`,phase:ph.id,due:"",status:"todo",link:"",notes:""}));
+    store.projects.push(np);store.active=np.id;save();closeModal();setView("dashboard");
+  });
+}
+function deleteProject(){
+  if(store.projects.length===1){alert("Debe existir al menos un proyecto.");return}
+  if(!confirm("¿Eliminar este proyecto? Esta acción no se puede deshacer salvo que tengas un respaldo exportado."))return;
+  store.projects=store.projects.filter(p=>p.id!==store.active);store.active=store.projects[0].id;save();setView("dashboard");
+}
+function exportData(){
+  const blob=new Blob([JSON.stringify(store,null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`crisp-agile-backup-${today()}.json`;a.click();URL.revokeObjectURL(a.href);
+}
+function importData(file){
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const data=JSON.parse(reader.result);
+      if(!data.projects||!Array.isArray(data.projects))throw new Error("Formato inválido");
+      store=data;if(!store.active)store.active=store.projects[0]?.id;save();render();alert("Respaldo importado correctamente.");
+    }catch(e){alert("No se pudo importar el archivo.");}
+  };
+  reader.readAsText(file);
+}
+
+$$(".nav button").forEach(b=>b.addEventListener("click",()=>setView(b.dataset.view)));
+$("#projectSelector").addEventListener("change",e=>{store.active=e.target.value;save();render()});
+$("#quickTaskBtn").onclick=()=>openTask();
+$("#quickSprintBtn").onclick=()=>openSprint();
+$("#newProjectBtn").onclick=newProject;
+$("#exportBtn").onclick=exportData;
+$("#importBtn").onclick=()=>$("#importFile").click();
+$("#importFile").addEventListener("change",e=>{if(e.target.files[0])importData(e.target.files[0]);e.target.value=""});
+window.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
+$("#modal").addEventListener("click",e=>{if(e.target===$("#modal"))closeModal()});
+
+render();
+</script>
+</body>
+</html>
