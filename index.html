@@ -302,6 +302,23 @@ async function testSupabase() {
 
 testSupabase();
 
+async function testInsertTask() {
+
+  const { data, error } = await db
+    .from("tasks")
+    .insert({
+      project_id: "923474ba-f43a-4fba-8db5-2adf44f29498",
+      title: "Prueba desde Dashboard",
+      phase: "business",
+      status: "todo",
+      priority: "medium"
+    })
+    .select();
+
+  console.log("INSERT DATA:", data);
+  console.log("INSERT ERROR:", error);
+}
+
 const PHASES = [
   {id:"business", n:1, name:"Business Understanding", es:"Comprensión del negocio", desc:"Problema, objetivos, stakeholders, alcance, restricciones y criterios de éxito."},
   {id:"data", n:2, name:"Data Understanding", es:"Comprensión de los datos", desc:"Fuentes, acceso, exploración, diccionario, calidad, patrones y hallazgos iniciales."},
