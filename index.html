@@ -863,8 +863,54 @@ async function openTask(id=null,phase=null,sprint=null){
       acceptance: $("#mAcceptance").value.trim(),
       notes: $("#mNotes").value.trim()
     };
-    if(id) Object.assign(p.tasks.find(x=>x.id===id),obj); else p.tasks.push(obj);
-    save();closeModal();render();
+    if (id) {
+
+  // Por ahora la edición sigue usando localStorage.
+  Object.assign(
+    p.tasks.find(x => x.id === id),
+    obj
+  );
+
+  save();
+  closeModal();
+  render();
+
+} else {
+
+  const { data, error } = await db
+    .from("tasks")
+    .insert(dbTask)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error al crear tarea:", error);
+    alert("No se pudo guardar la tarea en Supabase.");
+    return;
+  }
+
+  console.log("Tarea creada en Supabase:", data);
+
+  const newTask = {
+    id: data.id,
+    title: data.title,
+    phase: data.phase,
+    sprint: "",
+    status: data.status,
+    priority: data.priority,
+    owner: "",
+    due: data.due_date || "",
+    estimate: data.estimate || 0,
+    acceptance: data.acceptance || "",
+    notes: data.notes || ""
+  };
+
+  p.tasks.push(newTask);
+
+  save();
+  closeModal();
+  render();
+}
   });
 }
 function openSprint(id=null){
