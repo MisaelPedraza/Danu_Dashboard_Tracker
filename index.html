@@ -848,7 +848,7 @@ async function openTask(id=null,phase=null,sprint=null){
       <div class="field full"><label>Criterio de aceptación</label><textarea id="mAcceptance">${esc(t.acceptance||"")}</textarea></div>
       <div class="field full"><label>Notas</label><textarea id="mNotes">${esc(t.notes||"")}</textarea></div>
     </div>
-  `,()=>{
+  `,async ()=>{
     const title=$("#mTitle").value.trim(); if(!title){alert("Agrega un título.");return;}
     const obj={id:id||uid(),title,phase:$("#mPhase").value,sprint:$("#mSprint").value,status:$("#mStatus").value,priority:$("#mPriority").value,owner:$("#mOwner").value.trim(),due:$("#mDue").value,estimate:Number($("#mEstimate").value||0),acceptance:$("#mAcceptance").value.trim(),notes:$("#mNotes").value.trim()};
     if(id) Object.assign(p.tasks.find(x=>x.id===id),obj); else p.tasks.push(obj);
