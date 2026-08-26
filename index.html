@@ -290,6 +290,18 @@ const db = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
+
+async function testSupabase() {
+  const { data, error } = await db
+    .from("projects")
+    .select("*");
+
+  console.log("DATA:", data);
+  console.log("ERROR:", error);
+}
+
+testSupabase();
+
 const PHASES = [
   {id:"business", n:1, name:"Business Understanding", es:"Comprensión del negocio", desc:"Problema, objetivos, stakeholders, alcance, restricciones y criterios de éxito."},
   {id:"data", n:2, name:"Data Understanding", es:"Comprensión de los datos", desc:"Fuentes, acceso, exploración, diccionario, calidad, patrones y hallazgos iniciales."},
