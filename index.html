@@ -319,6 +319,8 @@ async function testInsertTask() {
   console.log("INSERT ERROR:", error);
 }
 
+testInsertTask();
+
 const PHASES = [
   {id:"business", n:1, name:"Business Understanding", es:"Comprensión del negocio", desc:"Problema, objetivos, stakeholders, alcance, restricciones y criterios de éxito."},
   {id:"data", n:2, name:"Data Understanding", es:"Comprensión de los datos", desc:"Fuentes, acceso, exploración, diccionario, calidad, patrones y hallazgos iniciales."},
@@ -831,7 +833,7 @@ $("#modalClose").onclick=closeModal;
 $("#modalCancel").onclick=closeModal;
 $("#modalSave").onclick=()=>{ if(modalState) modalState(); };
 
-function openTask(id=null,phase=null,sprint=null){
+async function openTask(id=null,phase=null,sprint=null){
   const p=project(), t=p.tasks.find(x=>x.id===id)||{};
   openModal(id?"Editar tarea":"Nueva tarea",`
     <div class="form-grid">
