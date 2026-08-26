@@ -865,10 +865,36 @@ async function openTask(id=null,phase=null,sprint=null){
     };
     if (id) {
 
-  // Por ahora la edición sigue usando localStorage.
+  const { data, error } = await db
+    .from("tasks")
+    .update(dbTask)
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error al actualizar tarea:", error);
+    alert("No se pudo actualizar la tarea en Supabase.");
+    return;
+  }
+
+  console.log("Tarea actualizada en Supabase:", data);
+
   Object.assign(
     p.tasks.find(x => x.id === id),
-    obj
+    {
+      id: data.id,
+      title: data.title,
+      phase: data.phase,
+      sprint: obj.sprint,
+      status: data.status,
+      priority: data.priority,
+      owner: obj.owner,
+      due: data.due_date || "",
+      estimate: data.estimate || 0,
+      acceptance: data.acceptance || "",
+      notes: data.notes || ""
+    }
   );
 
   save();
