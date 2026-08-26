@@ -284,7 +284,8 @@ hr{border:0;border-top:1px solid var(--line);margin:16px 0}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   const SUPABASE_URL = "https://svsmbasjhfgjlqcsmcyz.supabase.co";
-const SUPABASE_KEY = "sb_publishable_CJQSiBb91ph0baUyXAyw-A_iG5xeRmI";
+  const SUPABASE_KEY = "sb_publishable_CJQSiBb91ph0baUyXAyw-A_iG5xeRmI";
+  const DANU_PROJECT_ID = "923474ba-f43a-4fba-8db5-2adf44f29498";
 
 const db = window.supabase.createClient(
   SUPABASE_URL,
@@ -318,8 +319,6 @@ async function testInsertTask() {
   console.log("INSERT DATA:", data);
   console.log("INSERT ERROR:", error);
 }
-
-testInsertTask();
 
 const PHASES = [
   {id:"business", n:1, name:"Business Understanding", es:"Comprensión del negocio", desc:"Problema, objetivos, stakeholders, alcance, restricciones y criterios de éxito."},
